@@ -30,20 +30,49 @@ while True:
     
     
     
+    lower_out = np.array([26,15,130])
+    upper_out = np.array([140,190,191])
+    
+    upper_gray = np.array([130,45,150])
+    lower_gray = np.array([50,0,80])
 
-    upper_gray = np.array([120,50,140])
-    lower_gray = np.array([90,10,100])
     lower_white = np.array([0, 0, 168])
     upper_white = np.array([172, 111, 255])
+
     lower_yellow = np.array([22, 93, 0])
     upper_yellow = np.array([45, 255, 255])
+    
+    lower_blue = np.array([100, 0, 0])
+    upper_blue = np.array([160, 100, 75])
+
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     hsv = cv2.GaussianBlur(hsv, (15, 15), 2)
 
+
+    # out = cv2.inRange(hsv,lower_out,upper_out)
     obstacles = cv2.inRange(hsv,lower_gray,upper_gray)
     white_line = cv2.inRange(hsv,lower_white,upper_white)
     yellow_line = cv2.inRange(hsv,lower_yellow,upper_yellow)
+    mask = cv2.inRange(hsv,lower_blue,upper_blue)
+    
+    # ret, im = cv2.threshold(obstacles, 100, 255, cv2.THRESH_BINARY_INV)
+    points, heirarchy = cv2.findContours(obstacles,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    sorted_points = sorted(points, key=len)
+
+    try:
+        lane1 = cv2.fillPoly(np.zeros_like(obstacles), pts=[
+            sorted_points[-1]], color=(255))
+        lane2 = cv2.fillPoly(np.zeros_like(obstacles), pts=[
+            sorted_points[-2]], color=(255))
+    except:
+        print(Exception)
+        continue
+    
+    cv2.imshow("obstacles",lane1)
+
+
+
 
 
     y_white,x_white = np.where(white_line > 230)
@@ -70,12 +99,8 @@ while True:
             150)), 150], [int(white_fy(150)), 150], [int(white_fy(300)), 300], [int(white_fy(h)), h], [0, h]]]
         external_poly = np.array(black, dtype=np.int32)
 
-    cv2.fillPoly(frame, external_poly, (80, 80, 80))
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    hsv = cv2.GaussianBlur(hsv, (15, 15), 2)
+    # cv2.fillPoly(frame, external_poly, (80, 80, 80))
 
-    obstacles = cv2.inRange(hsv,lower_gray,upper_gray)
-    cv2.imshow("black",obstacles)
 
 
 
