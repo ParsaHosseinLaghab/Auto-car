@@ -108,3 +108,5 @@ while True:
         break
 
 cv2.destroyAllWindows()
+
+print("fuck you bitch")
